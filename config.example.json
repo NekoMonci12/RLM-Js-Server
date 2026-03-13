@@ -34,6 +34,7 @@
   ],
   "rlmConfig": {
     "maxDepth": 3,
-    "maxSubQuestions": 3
+    "maxSubQuestions": 3,
+    "maxTokens": 10000
   }
 }

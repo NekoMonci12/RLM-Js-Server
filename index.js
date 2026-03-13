@@ -27,6 +27,15 @@ try {
   process.exit(1)
 }
 
+let logQueue = Promise.resolve()
+
+const safeLog = (...args) => {
+  logQueue = logQueue.then(() => {
+    console.log(...args)
+  })
+  return logQueue
+}
+
 const setupTerminal = () => {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -43,7 +52,8 @@ const setupTerminal = () => {
     const providerId = options?.providerId || llm.defaultProviderId || 'unknown'
     const label = options?.label || 'processing'
     
-    process.stdout.write(`[${providerId}] ${label}... `)
+    // Use queue to avoid interleaving with other logs
+    safeLog(`[${providerId}] starting ${label}...`)
     
     const startTime = Date.now()
     try {
@@ -54,10 +64,10 @@ const setupTerminal = () => {
         ? `(${result.usage.promptTokens}+${result.usage.completionTokens}=${result.usage.totalTokens} tokens)`
         : '(no usage data)'
         
-      process.stdout.write(`done (${duration}s) ${usageStr}\n`)
+      safeLog(`[${providerId}] ${label} done (${duration}s) ${usageStr}`)
       return result
     } catch (error) {
-      process.stdout.write(`failed!\n`)
+      safeLog(`[${providerId}] ${label} failed!`)
       throw error
     }
   }
@@ -103,7 +113,7 @@ const setupTerminal = () => {
         }
         
         llm.register(p.id, completionFn, p.isDefault)
-        console.log(`Registered provider: ${p.id} (${p.type})`)
+        safeLog(`Registered provider: ${p.id} (${p.type})`)
       } catch (e) {
         console.error(`Failed to register provider ${p.id}:`, e.message)
       }
@@ -117,10 +127,19 @@ const setupTerminal = () => {
   }
 
   // Initialize Engine
-  const engine = new RLMEngine(llm, config.rlmConfig || { maxDepth: 3, maxSubQuestions: 3 })
+  const rlmConfig = {
+    maxDepth: config.rlmConfig?.maxDepth ?? 3,
+    maxSubQuestions: config.rlmConfig?.maxSubQuestions ?? 3,
+    maxTokens: config.rlmConfig?.maxTokens,
+    decompositionProviderId: config.rlmConfig?.decompositionProviderId,
+    synthesisProviderId: config.rlmConfig?.synthesisProviderId,
+    defaultProviderId: config.rlmConfig?.defaultProviderId,
+  }
 
-  console.log('\n--- Recursive LLM Terminal ---')
-  console.log('Type your question and press Enter. Type "exit" or "quit" to leave.\n')
+  const engine = new RLMEngine(llm, rlmConfig)
+
+  safeLog('\n--- Recursive LLM Terminal ---')
+  safeLog('Type your question and press Enter. Type "exit" or "quit" to leave.\n')
 
   rl.prompt()
 
@@ -137,33 +156,35 @@ const setupTerminal = () => {
       return
     }
 
-    console.log('\nThinking...\n')
+    safeLog('\nThinking...\n')
 
     try {
       const startTime = Date.now()
       const result = await engine.solve(input)
       const duration = ((Date.now() - startTime) / 1000).toFixed(2)
 
-      console.log('--- Final Answer ---')
-      console.log(result.answer)
-      console.log(`\n(Solved in ${duration}s)`)
+      safeLog('--- Final Answer ---')
+      safeLog(result.answer)
+      safeLog(`\n(Solved in ${duration}s)`)
       
       if (result.usage) {
-        console.log(`Tokens: ${result.usage.promptTokens} prompt, ${result.usage.completionTokens} completion, ${result.usage.totalTokens} total`)
+        safeLog(`Tokens: ${result.usage.promptTokens} prompt, ${result.usage.completionTokens} completion, ${result.usage.totalTokens} total`)
       }
       
       if (result.children && result.children.length > 0) {
-        console.log('\nDecomposition tree:')
+        safeLog('\nDecomposition tree:')
         printTree(result)
       }
     } catch (error) {
-      console.error('\nError:', error.message)
+      safeLog(`\nError: ${error.message}`)
     }
 
-    console.log('\n' + '-'.repeat(30) + '\n')
-    rl.prompt()
+    logQueue = logQueue.then(() => {
+      console.log('\n' + '-'.repeat(30) + '\n')
+      rl.prompt()
+    })
   }).on('close', () => {
-    console.log('\nGoodbye!')
+    safeLog('\nGoodbye!')
     process.exit(0)
   })
 }
@@ -173,7 +194,7 @@ const printTree = (node, indent = '') => {
     node.children.forEach((child, index) => {
       const isLast = index === node.children.length - 1
       const prefix = isLast ? '└── ' : '├── '
-      console.log(`${indent}${prefix}${child.question.substring(0, 60)}${child.question.length > 60 ? '...' : ''}`)
+      safeLog(`${indent}${prefix}${child.question.substring(0, 60)}${child.question.length > 60 ? '...' : ''}`)
       printTree(child, indent + (isLast ? '    ' : '│   '))
     })
   }
