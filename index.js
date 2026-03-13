@@ -37,6 +37,26 @@ const setupTerminal = () => {
   // Initialize LLM Service
   const llm = new LLMService()
   
+  // Wrap completion to show progress
+  const originalCompletion = llm.completion.bind(llm)
+  llm.completion = async (messages, options) => {
+    const providerId = options?.providerId || llm.defaultProviderId || 'unknown'
+    const label = options?.label || 'processing'
+    
+    process.stdout.write(`[${providerId}] ${label}... `)
+    
+    const startTime = Date.now()
+    try {
+      const result = await originalCompletion(messages, options)
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2)
+      process.stdout.write(`done (${duration}s)\n`)
+      return result
+    } catch (error) {
+      process.stdout.write(`failed!\n`)
+      throw error
+    }
+  }
+  
   // Register providers from config
   if (config.providers && Array.isArray(config.providers)) {
     config.providers.forEach((p) => {
