@@ -1,0 +1,22 @@
+{
+  "name": "rlm-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NekoMonci12/RLM-Js-Server.git"
+  },
+  "author": "NekoMonci12",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NekoMonci12/RLM-Js-Server/issues"
+  },
+  "homepage": "https://github.com/NekoMonci12/RLM-Js-Server#readme",
+  "dependencies": {
+    "@yuemi-development/rlm-js": "^1.0.0"
+  }
+}
