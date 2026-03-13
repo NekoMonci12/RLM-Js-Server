@@ -49,7 +49,12 @@ const setupTerminal = () => {
     try {
       const result = await originalCompletion(messages, options)
       const duration = ((Date.now() - startTime) / 1000).toFixed(2)
-      process.stdout.write(`done (${duration}s)\n`)
+      
+      const usageStr = result.usage 
+        ? `(${result.usage.promptTokens}+${result.usage.completionTokens}=${result.usage.totalTokens} tokens)`
+        : '(no usage data)'
+        
+      process.stdout.write(`done (${duration}s) ${usageStr}\n`)
       return result
     } catch (error) {
       process.stdout.write(`failed!\n`)
@@ -75,15 +80,21 @@ const setupTerminal = () => {
           case 'dummy':
             completionFn = async (messages) => {
               const lastMessage = messages[messages.length - 1].content
+              const usage = { promptTokens: 10, completionTokens: 5, totalTokens: 15 }
+              
               if (lastMessage.includes('isComplex')) {
                 return {
                   content: JSON.stringify({
                     isComplex: true,
                     subQuestions: ['What is task 1?', 'What is task 2?'],
                   }),
+                  usage,
                 }
               }
-              return { content: 'This is a mock response from the dummy provider.' }
+              return { 
+                content: 'This is a mock response from the dummy provider.',
+                usage,
+              }
             }
             break
           default:
@@ -136,6 +147,10 @@ const setupTerminal = () => {
       console.log('--- Final Answer ---')
       console.log(result.answer)
       console.log(`\n(Solved in ${duration}s)`)
+      
+      if (result.usage) {
+        console.log(`Tokens: ${result.usage.promptTokens} prompt, ${result.usage.completionTokens} completion, ${result.usage.totalTokens} total`)
+      }
       
       if (result.children && result.children.length > 0) {
         console.log('\nDecomposition tree:')
