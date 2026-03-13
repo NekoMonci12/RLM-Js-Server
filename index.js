@@ -134,6 +134,8 @@ const setupTerminal = () => {
     decompositionProviderId: config.rlmConfig?.decompositionProviderId,
     synthesisProviderId: config.rlmConfig?.synthesisProviderId,
     defaultProviderId: config.rlmConfig?.defaultProviderId,
+    strategy: config.rlmConfig?.strategy,
+    providerPool: config.rlmConfig?.providerPool,
   }
 
   const engine = new RLMEngine(llm, rlmConfig)

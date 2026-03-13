@@ -35,6 +35,7 @@
   "rlmConfig": {
     "maxDepth": 3,
     "maxSubQuestions": 3,
-    "maxTokens": 10000
+    "maxTokens": 10000,
+    "strategy": "round-robin"
   }
 }
