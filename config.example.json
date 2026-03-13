@@ -1,0 +1,39 @@
+{
+  "providers": [
+    {
+      "id": "openai",
+      "type": "openai",
+      "apiKey": "YOUR_OPENAI_API_KEY",
+      "model": "gpt-4o",
+      "isDefault": true
+    },
+    {
+      "id": "anthropic",
+      "type": "anthropic",
+      "apiKey": "YOUR_ANTHROPIC_API_KEY",
+      "model": "claude-3-5-sonnet-latest"
+    },
+    {
+      "id": "deepseek",
+      "type": "openai",
+      "apiKey": "YOUR_DEEPSEEK_API_KEY",
+      "baseURL": "https://api.deepseek.com",
+      "model": "deepseek-chat"
+    },
+    {
+      "id": "openrouter",
+      "type": "openrouter",
+      "apiKey": "YOUR_OPENROUTER_API_KEY",
+      "model": "anthropic/claude-3.5-sonnet"
+    },
+    {
+      "id": "dummy",
+      "type": "dummy",
+      "isDefault": false
+    }
+  ],
+  "rlmConfig": {
+    "maxDepth": 3,
+    "maxSubQuestions": 3
+  }
+}
