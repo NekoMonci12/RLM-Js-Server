@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/NekoMonci12/RLM-Js-Server#readme",
   "dependencies": {
-    "@yuemi-development/rlm-js": "^1.0.4"
+    "@yuemi-development/rlm-js": "^1.0.5"
   }
 }

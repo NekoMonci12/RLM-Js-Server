@@ -36,6 +36,8 @@
     "maxDepth": 3,
     "maxSubQuestions": 3,
     "maxTokens": 10000,
-    "strategy": "round-robin"
+    "strategy": "round-robin",
+    "maxRetries": 3,
+    "systemPrompt": "You are a very helpful assistant. Always respond in a poetic way."
   }
 }

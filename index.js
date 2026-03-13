@@ -136,6 +136,8 @@ const setupTerminal = () => {
     defaultProviderId: config.rlmConfig?.defaultProviderId,
     strategy: config.rlmConfig?.strategy,
     providerPool: config.rlmConfig?.providerPool,
+    maxRetries: config.rlmConfig?.maxRetries,
+    systemPrompt: config.rlmConfig?.systemPrompt,
   }
 
   const engine = new RLMEngine(llm, rlmConfig)
